@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dataDir = path.resolve(__dirname, '../data');
+const dataDir = process.env.VERCEL ? path.resolve('/tmp', 'cae-checklist-data') : path.resolve(__dirname, '../data');
 const dataFile = path.resolve(dataDir, 'store.json');
 
 const CATEGORY_RAW = 'raw';
