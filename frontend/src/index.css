@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 18px;
+}
+
+body {
+  @apply bg-emerald-50 text-emerald-950 antialiased font-sans;
+}
+
+table {
+  @apply w-full border-collapse;
+}
+
+th,
+td {
+  @apply align-middle;
+}

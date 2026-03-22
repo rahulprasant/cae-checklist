@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "backend: dev",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev",
+				"--prefix",
+				"backend"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "frontend: dev",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev",
+				"--prefix",
+				"frontend"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "frontend: build",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build",
+				"--prefix",
+				"frontend"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		}
+	]
+}
