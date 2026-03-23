@@ -1,10 +1,17 @@
 name: Vercel Auto Deploy
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
+concurrency:
+  group: vercel-production-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -17,6 +24,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Validate required secrets
+        run: |
+          missing=0
+          [ -z "${{ secrets.VERCEL_TOKEN }}" ] && echo "Missing secret: VERCEL_TOKEN" && missing=1
+          [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && echo "Missing secret: VERCEL_ORG_ID" && missing=1
+          [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && echo "Missing secret: VERCEL_PROJECT_ID" && missing=1
+          if [ $missing -eq 1 ]; then
+            echo "Add these in GitHub: Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -34,7 +52,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
