@@ -157,10 +157,12 @@ export default function StockDashboard() {
         </button>
         <input
           ref={fileInputRef}
+          id="file-input-import"
           type="file"
           accept="application/json"
           className="hidden"
           onChange={handleImportFile}
+          aria-label="Import data file"
         />
       </div>
 
@@ -206,9 +208,11 @@ export default function StockDashboard() {
                   <tr key={material.id} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="px-3 py-2 text-center">
                       <input
+                        id={`material-checkbox-${material.id}`}
                         type="checkbox"
                         checked={selectedMaterials.has(material.id)}
                         onChange={() => handleMaterialCheckbox(material.id)}
+                        aria-label={`Select material: ${material.name}`}
                         className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                       />
                     </td>
@@ -278,6 +282,7 @@ export default function StockDashboard() {
                       <td className="px-3 py-2 text-slate-800">{row.material_name}</td>
                       <td className="px-3 py-2 text-right">
                         <input
+                          id={`available-qty-${row.id}`}
                           type="number"
                           min="0"
                           step="0.01"
@@ -285,11 +290,13 @@ export default function StockDashboard() {
                           onChange={(e) =>
                             handleChange(row.id, 'available_quantity', e.target.value)
                           }
+                          aria-label={`Available quantity for ${row.material_name}`}
                           className="w-24 text-right rounded-md border border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm"
                         />
                       </td>
                       <td className="px-3 py-2 text-right">
                         <input
+                          id={`min-threshold-${row.id}`}
                           type="number"
                           min="0"
                           step="0.01"
@@ -297,6 +304,7 @@ export default function StockDashboard() {
                           onChange={(e) =>
                             handleChange(row.id, 'minimum_threshold', e.target.value)
                           }
+                          aria-label={`Minimum threshold for ${row.material_name}`}
                           className="w-24 text-right rounded-md border border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-sm"
                         />
                       </td>

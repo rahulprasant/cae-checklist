@@ -58,9 +58,11 @@ export default function AddMachine() {
 
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Machine Name</label>
+          <label htmlFor="machine-name" className="block text-sm font-medium text-slate-700 mb-1">Machine Name</label>
           <input
+            id="machine-name"
             type="text"
+            name="machine-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 text-sm"

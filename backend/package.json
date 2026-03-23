@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "migrate": "node migrate.js",
+    "migrate:data": "node migrateData.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

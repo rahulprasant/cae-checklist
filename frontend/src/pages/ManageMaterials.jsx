@@ -130,13 +130,14 @@ export default function ManageMaterials() {
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
         <div className="w-full md:w-64">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label htmlFor="machine-select" className="block text-sm font-medium text-slate-700 mb-1">
             Select Machine
           </label>
           {loadingMachines ? (
             <Spinner />
           ) : (
             <select
+              id="machine-select"
               value={selectedMachineId}
               onChange={(e) => setSelectedMachineId(e.target.value)}
               className="w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 text-sm"
@@ -158,10 +159,11 @@ export default function ManageMaterials() {
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="category-select" className="block text-sm font-medium text-slate-700 mb-1">
               Category
             </label>
             <select
+              id="category-select"
               name="category"
               value={form.category}
               onChange={handleChange}
@@ -175,10 +177,11 @@ export default function ManageMaterials() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="material-name" className="block text-sm font-medium text-slate-700 mb-1">
               Name
             </label>
             <input
+              id="material-name"
               name="name"
               type="text"
               value={form.name}
@@ -188,10 +191,11 @@ export default function ManageMaterials() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="quantity" className="block text-sm font-medium text-slate-700 mb-1">
               Quantity
             </label>
             <input
+              id="quantity"
               name="quantity"
               type="number"
               min="0"
@@ -203,8 +207,9 @@ export default function ManageMaterials() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
+            <label htmlFor="unit" className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
             <input
+              id="unit"
               name="unit"
               type="text"
               value={form.unit}

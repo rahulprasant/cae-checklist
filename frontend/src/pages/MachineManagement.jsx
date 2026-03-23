@@ -180,6 +180,7 @@ export default function MachineManagement() {
   const [editingMachineName, setEditingMachineName] = useState('');
   const [savingEditMachineId, setSavingEditMachineId] = useState(null);
   const [error, setError] = useState('');
+  const [copiedMachineId, setCopiedMachineId] = useState(null);
 
   const loadMachines = async () => {
     try {
@@ -315,6 +316,13 @@ export default function MachineManagement() {
     }
   };
 
+  const handleShareMachine = (machineId) => {
+    const shareLink = `${window.location.origin}/public/machines/${machineId}`;
+    navigator.clipboard.writeText(shareLink);
+    setCopiedMachineId(machineId);
+    setTimeout(() => setCopiedMachineId(null), 2000);
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -401,6 +409,18 @@ export default function MachineManagement() {
                             }`}
                           >
                             {m.name}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleShareMachine(m.id)}
+                            className={`px-2 py-1 text-xs font-medium transition-colors ${
+                              copiedMachineId === m.id
+                                ? 'text-green-700 hover:text-green-900'
+                                : 'text-purple-700 hover:text-purple-900'
+                            }`}
+                            title="Copy shareable link"
+                          >
+                            {copiedMachineId === m.id ? '✓' : '🔗'}
                           </button>
                           <button
                             type="button"

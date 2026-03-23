@@ -331,10 +331,12 @@ export default function GenerateChecklist() {
         <h3 className="text-md font-semibold text-slate-800 mb-4">Project Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="site-name" className="block text-sm font-medium text-slate-700 mb-1">
               Site Name
             </label>
             <input
+              id="site-name"
+              name="site-name"
               type="text"
               value={siteName}
               onChange={(e) => setSiteName(e.target.value)}
@@ -343,10 +345,12 @@ export default function GenerateChecklist() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="delivery-date" className="block text-sm font-medium text-slate-700 mb-1">
               Date of Delivery (DD/MM/YYYY)
             </label>
             <input
+              id="delivery-date"
+              name="delivery-date"
               type="date"
               value={deliveryDate}
               onChange={(e) => setDeliveryDate(e.target.value)}
@@ -367,6 +371,7 @@ export default function GenerateChecklist() {
               return (
                 <label
                   key={m.id}
+                  htmlFor={`machine-checkbox-${m.id}`}
                   className={`inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
                     checked
                       ? 'border-sky-500 bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-sm'
@@ -374,6 +379,7 @@ export default function GenerateChecklist() {
                   }`}
                 >
                   <input
+                    id={`machine-checkbox-${m.id}`}
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleMachine(m.id)}

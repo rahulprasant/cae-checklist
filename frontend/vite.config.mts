@@ -6,7 +6,16 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:4001',
+      '/api': {
+        target: 'http://localhost:4001',
+        changeOrigin: true,
+      },
     },
+  },
+  preview: {
+    port: 5173,
+  },
+  build: {
+    sourcemap: false,
   },
 });

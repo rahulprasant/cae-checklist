@@ -19,6 +19,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get single machine by ID
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const machines = await getMachines();
+    const machine = machines.find((m) => m.id === parseInt(id));
+    if (!machine) return res.status(404).json({ error: 'Machine not found' });
+    res.json(machine);
+  } catch (err) {
+    console.error('Error fetching machine', err);
+    res.status(500).json({ error: 'Failed to fetch machine' });
+  }
+});
+
 // Create machine
 router.post('/', async (req, res) => {
   const { name } = req.body;
