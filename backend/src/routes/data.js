@@ -34,4 +34,11 @@ router.post('/import', async (req, res) => {
   }
 });
 
+router.get('/import', (req, res) => {
+  res.status(405).json({
+    error: 'Method Not Allowed',
+    message: 'Use POST /api/data/import with JSON payload to import data.',
+  });
+});
+
 export default router;

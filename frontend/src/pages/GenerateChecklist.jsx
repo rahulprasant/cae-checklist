@@ -72,14 +72,6 @@ export default function GenerateChecklist() {
     setLowStockAlerts([]);
     setPdfBlob(null);
     setPdfPreviewUrl(null);
-    if (!siteName.trim()) {
-      setError('Please enter site name');
-      return;
-    }
-    if (!deliveryDate.trim()) {
-      setError('Please enter delivery date');
-      return;
-    }
     const selectedMachineIds = Object.keys(selectedMachineQuantities);
     if (selectedMachineIds.length === 0) {
       setError('Please select at least one machine');
@@ -144,7 +136,8 @@ export default function GenerateChecklist() {
     const addInfoSection = () => {
       const now = new Date();
       const currentDate = now.toLocaleDateString('en-GB');
-      const formattedDeliveryDate = formatDateForDisplay(deliveryDate);
+      const formattedDeliveryDate = formatDateForDisplay(deliveryDate) || 'N/A';
+      const printableSiteName = siteName.trim() || 'N/A';
 
       // Light yellow background for info
       doc.setFillColor(255, 255, 200); // Light yellow
@@ -156,7 +149,7 @@ export default function GenerateChecklist() {
       doc.setFont(undefined, 'normal');
 
       // Site Name
-      doc.text(`Site Name: ${siteName}`, margins.left + 2, yPosition + 1);
+      doc.text(`Site Name: ${printableSiteName}`, margins.left + 2, yPosition + 1);
       doc.text(`Date: ${currentDate}`, margins.left + 2, yPosition + 5);
       doc.text(`Date of Delivery: ${formattedDeliveryDate}`, pageWidth - margins.right - 2, yPosition + 5, {
         align: 'right',
