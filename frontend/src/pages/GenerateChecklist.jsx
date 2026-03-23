@@ -7,7 +7,7 @@ import ErrorAlert from '../components/ErrorAlert.jsx';
 
 export default function GenerateChecklist() {
   const [machines, setMachines] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedMachineQuantities, setSelectedMachineQuantities] = useState({});
   const [loadingMachines, setLoadingMachines] = useState(false);
   const [loadingChecklist, setLoadingChecklist] = useState(false);
   const [error, setError] = useState('');
@@ -36,9 +36,27 @@ export default function GenerateChecklist() {
   }, []);
 
   const toggleMachine = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    const key = String(id);
+    setSelectedMachineQuantities((prev) => {
+      if (prev[key]) {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+      return { ...prev, [key]: 1 };
+    });
+  };
+
+  const updateMachineQuantity = (id, quantity) => {
+    const key = String(id);
+    const safeQuantity = Number.isFinite(Number(quantity))
+      ? Math.max(1, Math.floor(Number(quantity)))
+      : 1;
+
+    setSelectedMachineQuantities((prev) => ({
+      ...prev,
+      [key]: safeQuantity,
+    }));
   };
 
   const formatDateForDisplay = (isoDate) => {
@@ -62,14 +80,21 @@ export default function GenerateChecklist() {
       setError('Please enter delivery date');
       return;
     }
-    if (selectedIds.length === 0) {
+    const selectedMachineIds = Object.keys(selectedMachineQuantities);
+    if (selectedMachineIds.length === 0) {
       setError('Please select at least one machine');
       return;
     }
+
+    const expandedMachineIds = selectedMachineIds.flatMap((id) => {
+      const quantity = Math.max(1, Math.floor(Number(selectedMachineQuantities[id] || 1)));
+      return Array(quantity).fill(Number(id));
+    });
+
     try {
       setLoadingChecklist(true);
       const res = await api.post('/checklists/generate', {
-        machineIds: selectedIds,
+        machineIds: expandedMachineIds,
       });
       setResults(res.data);
       setLowStockAlerts(res.data.lowStockAlerts || []);
@@ -79,6 +104,7 @@ export default function GenerateChecklist() {
         purchaseMaterials: res.data.purchaseMaterials || [],
         loadingChecklist: res.data.loadingChecklist || [],
         machineWiseMaterials: res.data.machineWiseMaterials || {},
+        machineWiseGroups: res.data.machineWiseGroups || {},
       });
     } catch (err) {
       console.error(err);
@@ -139,7 +165,7 @@ export default function GenerateChecklist() {
       yPosition += 11;
     };
 
-    const addMachineSection = (machineName, materials) => {
+    const addMachineSection = (machineName, materials, machineNames = []) => {
       // Check if new page needed
       if (yPosition > pageHeight - 35) {
         doc.addPage();
@@ -157,13 +183,23 @@ export default function GenerateChecklist() {
       yPosition += 5.5;
 
       // Prepare table data with empty checkbox cells
-      const tableBody = materials.map((item, index) => [
+      const machineRows = machineNames.map((name, index) => [
         index + 1,
+        name,
+        '',
+        '',
+        '',
+      ]);
+
+      const materialRows = materials.map((item, index) => [
+        machineRows.length + index + 1,
         item.name,
         item.total_quantity,
         item.unit,
-        '', // Empty checkbox cell
+        '',
       ]);
+
+      const tableBody = [...machineRows, ...materialRows];
 
       autoTable(doc, {
         startY: yPosition,
@@ -221,13 +257,14 @@ export default function GenerateChecklist() {
     addInfoSection();
 
     // Get machine-wise materials
-    const machineWiseMaterials = checklistData.machineWiseMaterials || {};
-    const machineNames = Object.keys(machineWiseMaterials);
+    const machineWiseGroups = checklistData.machineWiseGroups || {};
+    const machineGroupNames = Object.keys(machineWiseGroups);
 
-    if (machineNames.length > 0) {
+    if (machineGroupNames.length > 0) {
       // Add sections by machine
-      machineNames.forEach((machineName) => {
-        addMachineSection(machineName, machineWiseMaterials[machineName]);
+      machineGroupNames.forEach((machineName) => {
+        const group = machineWiseGroups[machineName] || {};
+        addMachineSection(machineName, group.materials || [], group.machines || []);
       });
     } else {
       // Fallback: Show sections
@@ -269,6 +306,14 @@ export default function GenerateChecklist() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  const selectedMachineList = machines
+    .filter((m) => selectedMachineQuantities[String(m.id)])
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      quantity: Number(selectedMachineQuantities[String(m.id)] || 1),
+    }));
 
   return (
     <div className="space-y-6">
@@ -316,13 +361,13 @@ export default function GenerateChecklist() {
         {loadingMachines ? (
           <Spinner />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-2">
             {machines.map((m) => {
-              const checked = selectedIds.includes(m.id);
+              const checked = Boolean(selectedMachineQuantities[String(m.id)]);
               return (
                 <label
                   key={m.id}
-                  className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm cursor-pointer transition-colors ${
                     checked
                       ? 'border-sky-500 bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-sm'
                       : 'border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50'
@@ -343,6 +388,45 @@ export default function GenerateChecklist() {
             )}
           </div>
         )}
+
+        {selectedMachineList.length > 0 && (
+          <div className="mt-4 border border-slate-200 rounded-md bg-white/90 p-3 space-y-2">
+            <h4 className="text-sm font-semibold text-slate-700">Selected Machines</h4>
+            <div className="space-y-2">
+              {selectedMachineList.map((machine, index) => (
+                <div key={machine.id} className="flex items-center justify-between gap-3 rounded-md border border-slate-100 px-3 py-2">
+                  <div className="text-sm text-slate-700">
+                    {index + 1}. {machine.name}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => updateMachineQuantity(machine.id, machine.quantity - 1)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={machine.quantity}
+                      onChange={(e) => updateMachineQuantity(machine.id, e.target.value)}
+                      className="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm text-center"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateMachineQuantity(machine.id, machine.quantity + 1)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-4">
           <button
             type="button"

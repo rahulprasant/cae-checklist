@@ -1,21 +1,27 @@
 {
   "meta": {
-    "nextMachineId": 6,
-    "nextMaterialId": 10,
+    "nextMachineId": 7,
+    "nextMaterialId": 12,
     "nextStockId": 10
   },
   "machines": [
     {
       "id": 4,
-      "name": "conveyor",
+      "name": "Conveyor 11 feet",
       "created_at": "2026-03-22T03:23:52.491Z",
-      "updated_at": "2026-03-22T03:23:52.491Z"
+      "updated_at": "2026-03-22T16:22:35.550Z"
     },
     {
       "id": 5,
       "name": "elevator",
       "created_at": "2026-03-22T03:46:06.059Z",
       "updated_at": "2026-03-22T03:46:06.059Z"
+    },
+    {
+      "id": 6,
+      "name": "Conveyor 23 feet",
+      "created_at": "2026-03-22T16:15:35.727Z",
+      "updated_at": "2026-03-22T16:22:42.228Z"
     }
   ],
   "materials": [
@@ -58,6 +64,26 @@
       "unit": "pcs",
       "created_at": "2026-03-22T03:46:41.811Z",
       "updated_at": "2026-03-22T03:46:41.812Z"
+    },
+    {
+      "id": 10,
+      "machine_id": 6,
+      "category": "purchase",
+      "name": "small roller",
+      "quantity": 7,
+      "unit": "pcs",
+      "created_at": "2026-03-22T16:16:00.431Z",
+      "updated_at": "2026-03-22T16:16:00.431Z"
+    },
+    {
+      "id": 11,
+      "machine_id": 6,
+      "category": "purchase",
+      "name": "rails",
+      "quantity": 50,
+      "unit": "pcs",
+      "created_at": "2026-03-22T16:16:15.103Z",
+      "updated_at": "2026-03-22T16:16:15.105Z"
     }
   ],
   "stock": [
@@ -107,7 +133,7 @@
       "available_quantity": 0,
       "minimum_threshold": 0,
       "created_at": "2026-03-22T03:34:23.563Z",
-      "updated_at": "2026-03-22T04:58:54.897Z"
+      "updated_at": "2026-03-22T16:30:09.852Z"
     },
     {
       "id": 7,
@@ -115,7 +141,7 @@
       "available_quantity": 0,
       "minimum_threshold": 0,
       "created_at": "2026-03-22T03:34:36.627Z",
-      "updated_at": "2026-03-22T04:58:54.897Z"
+      "updated_at": "2026-03-22T16:30:09.852Z"
     },
     {
       "id": 8,
@@ -123,7 +149,7 @@
       "available_quantity": 0,
       "minimum_threshold": 0,
       "created_at": "2026-03-22T03:46:27.626Z",
-      "updated_at": "2026-03-22T04:58:54.897Z"
+      "updated_at": "2026-03-22T16:30:09.849Z"
     },
     {
       "id": 9,
@@ -131,7 +157,7 @@
       "available_quantity": 0,
       "minimum_threshold": 0,
       "created_at": "2026-03-22T03:46:41.812Z",
-      "updated_at": "2026-03-22T04:58:54.897Z"
+      "updated_at": "2026-03-22T16:30:09.852Z"
     }
   ]
 }

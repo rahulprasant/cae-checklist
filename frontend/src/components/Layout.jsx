@@ -2,7 +2,7 @@ import Sidebar from './Sidebar.jsx';
 
 const pageTitles = {
   'checklist-generater': 'Checklist Generater',
-  'mange-machines': 'Mange Machines',
+  'manage-machines': 'Manage Machines',
   'stock-details': 'Stock Details',
   'manage-stock': 'Manage Stock',
 };

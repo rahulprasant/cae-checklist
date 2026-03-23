@@ -9,7 +9,7 @@ export default function App() {
 
   let content = null;
   if (currentPage === 'checklist-generater') content = <GenerateChecklist />;
-  else if (currentPage === 'mange-machines') content = <MachineManagement />;
+  else if (currentPage === 'manage-machines') content = <MachineManagement />;
   else if (currentPage === 'stock-details') content = <StockDashboard />;
   else if (currentPage === 'manage-stock') content = <StockDashboard />;
 

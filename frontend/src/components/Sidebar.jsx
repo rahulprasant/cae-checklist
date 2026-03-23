@@ -1,6 +1,6 @@
 const navItems = [
   { id: 'checklist-generater', label: 'Checklist Generater' },
-  { id: 'mange-machines', label: 'Mange Machines' },
+  { id: 'manage-machines', label: 'Manage Machines' },
   { id: 'stock-details', label: 'Stock Details' },
   { id: 'manage-stock', label: 'Manage Stock' },
 ];

@@ -176,6 +176,9 @@ export default function MachineManagement() {
   const [loadingMaterials, setLoadingMaterials] = useState(false);
   const [savingMachine, setSavingMachine] = useState(false);
   const [deletingMachineId, setDeletingMachineId] = useState(null);
+  const [editingMachineId, setEditingMachineId] = useState(null);
+  const [editingMachineName, setEditingMachineName] = useState('');
+  const [savingEditMachineId, setSavingEditMachineId] = useState(null);
   const [error, setError] = useState('');
 
   const loadMachines = async () => {
@@ -280,6 +283,38 @@ export default function MachineManagement() {
     }
   };
 
+  const handleStartEditMachine = (machine) => {
+    setEditingMachineId(machine.id);
+    setEditingMachineName(machine.name);
+    setError('');
+  };
+
+  const handleCancelEditMachine = () => {
+    setEditingMachineId(null);
+    setEditingMachineName('');
+  };
+
+  const handleSaveEditMachine = async (id) => {
+    const name = editingMachineName.trim();
+    if (!name) {
+      setError('Machine name is required');
+      return;
+    }
+
+    try {
+      setSavingEditMachineId(id);
+      await api.put(`/machines/${id}`, { name });
+      await loadMachines();
+      setEditingMachineId(null);
+      setEditingMachineName('');
+    } catch (err) {
+      console.error(err);
+      setError(getApiErrorMessage(err, 'Failed to update machine name'));
+    } finally {
+      setSavingEditMachineId(null);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -327,27 +362,63 @@ export default function MachineManagement() {
               <div className="space-y-1 max-h-80 overflow-y-auto text-sm">
                 {machines.map((m) => {
                   const active = String(m.id) === String(selectedMachineId);
+                  const isEditing = editingMachineId === m.id;
                   return (
                     <div key={m.id} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedMachineId(String(m.id))}
-                        className={`flex-1 text-left px-3 py-2 rounded-md border text-sm transition-colors ${
-                          active
-                            ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm'
-                            : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50'
-                        }`}
-                      >
-                        {m.name}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMachine(m.id)}
-                        disabled={deletingMachineId === m.id}
-                        className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-60"
-                      >
-                        {deletingMachineId === m.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                      {isEditing ? (
+                        <>
+                          <input
+                            type="text"
+                            value={editingMachineName}
+                            onChange={(e) => setEditingMachineName(e.target.value)}
+                            className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm bg-white/90 shadow-sm focus:border-sky-500 focus:ring-sky-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveEditMachine(m.id)}
+                            disabled={savingEditMachineId === m.id}
+                            className="px-2 py-1 text-xs font-medium text-emerald-700 hover:text-emerald-900 disabled:opacity-60"
+                          >
+                            {savingEditMachineId === m.id ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEditMachine}
+                            className="px-2 py-1 text-xs font-medium text-slate-600 hover:text-slate-800"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMachineId(String(m.id))}
+                            className={`flex-1 text-left px-3 py-2 rounded-md border text-sm transition-colors ${
+                              active
+                                ? 'border-indigo-500 bg-indigo-600 text-white shadow-sm'
+                                : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50'
+                            }`}
+                          >
+                            {m.name}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditMachine(m)}
+                            className="px-2 py-1 text-xs font-medium text-sky-700 hover:text-sky-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteMachine(m.id)}
+                            disabled={deletingMachineId === m.id}
+                            className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-60"
+                          >
+                            {deletingMachineId === m.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        </>
+                      )}
                     </div>
                   );
                 })}

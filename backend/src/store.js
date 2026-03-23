@@ -240,11 +240,18 @@ function splitByCategory(rows) {
 }
 
 function aggregateByCategoryAndName(materials, machineIds) {
-  const machineIdSet = new Set(machineIds.map((id) => Number(id)));
+  const machineCountMap = machineIds.reduce((acc, id) => {
+    const machineId = Number(id);
+    acc.set(machineId, (acc.get(machineId) || 0) + 1);
+    return acc;
+  }, new Map());
+
   const map = new Map();
 
   for (const material of materials) {
-    if (!machineIdSet.has(Number(material.machine_id))) continue;
+    const machineCount = machineCountMap.get(Number(material.machine_id)) || 0;
+    if (machineCount <= 0) continue;
+
     const key = `${material.category}__${material.name}__${material.unit}`;
     const existing =
       map.get(key) ||
@@ -254,7 +261,7 @@ function aggregateByCategoryAndName(materials, machineIds) {
         unit: material.unit,
         total_quantity: 0,
       };
-    existing.total_quantity += toNumber(material.quantity);
+    existing.total_quantity += toNumber(material.quantity) * machineCount;
     map.set(key, existing);
   }
 
@@ -279,48 +286,88 @@ function aggregateLoadingChecklist(fabricationParts, purchaseMaterials) {
   return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function getMachineGroupName(machineName) {
+  const value = String(machineName || '').trim();
+  if (!value) return 'Machine';
+
+  const textBeforeNumber = value.match(/^[^\d]+/)?.[0]?.trim();
+  if (textBeforeNumber) {
+    return textBeforeNumber;
+  }
+
+  return value.split(/\s+/)[0] || value;
+}
+
+function addMaterialQuantity(map, material) {
+  const key = `${material.name}__${material.unit}`;
+  const existing = map.get(key) || {
+    name: material.name,
+    total_quantity: 0,
+    unit: material.unit,
+  };
+
+  existing.total_quantity += toNumber(material.quantity);
+  map.set(key, existing);
+}
+
 export async function generateChecklist(machineIds) {
   const data = await loadData();
+  const machineCountMap = machineIds.reduce((acc, id) => {
+    const machineId = Number(id);
+    acc.set(machineId, (acc.get(machineId) || 0) + 1);
+    return acc;
+  }, new Map());
 
   const aggregated = aggregateByCategoryAndName(data.materials, machineIds);
   const { rawMaterials, fabricationParts, purchaseMaterials } = splitByCategory(aggregated);
   const loadingChecklist = aggregateLoadingChecklist(fabricationParts, purchaseMaterials);
 
   // Generate machine-wise loading checklist
-  const machineIdSet = new Set(machineIds.map((id) => Number(id)));
   const machineWiseMaterials = {};
-  
-  for (const machineId of machineIds) {
-    const numMachineId = Number(machineId);
+  const machineWiseGroups = {};
+  const groupedMachineMaterialMap = new Map();
+  const groupedMachineNamesMap = new Map();
+
+  for (const [numMachineId, machineCount] of machineCountMap.entries()) {
     const machine = data.machines.find((m) => m.id === numMachineId);
     if (!machine) continue;
-    
+
     const machineMaterials = data.materials.filter((m) => m.machine_id === numMachineId);
-    const fabrication = machineMaterials.filter((m) => m.category === CATEGORY_FABRICATION);
-    const purchase = machineMaterials.filter((m) => m.category === CATEGORY_PURCHASE);
-    
-    const machineLoadingChecklist = [];
-    
-    // Add fabrication parts
-    for (const mat of fabrication) {
-      machineLoadingChecklist.push({
-        name: mat.name,
-        total_quantity: toNumber(mat.quantity),
-        unit: mat.unit,
+    const machineGroupName = getMachineGroupName(machine.name);
+    const groupMap = groupedMachineMaterialMap.get(machineGroupName) || new Map();
+    const groupMachineNames = groupedMachineNamesMap.get(machineGroupName) || new Set();
+    groupMachineNames.add(machineCount > 1 ? `${machine.name} x${machineCount}` : machine.name);
+
+    for (const mat of machineMaterials) {
+      if (mat.category !== CATEGORY_FABRICATION && mat.category !== CATEGORY_PURCHASE) continue;
+      addMaterialQuantity(groupMap, {
+        ...mat,
+        quantity: toNumber(mat.quantity) * machineCount,
       });
     }
-    
-    // Add purchase materials
-    for (const mat of purchase) {
-      machineLoadingChecklist.push({
-        name: mat.name,
-        total_quantity: toNumber(mat.quantity),
-        unit: mat.unit,
-      });
-    }
-    
-    if (machineLoadingChecklist.length > 0) {
-      machineWiseMaterials[machine.name] = machineLoadingChecklist;
+
+    groupedMachineMaterialMap.set(machineGroupName, groupMap);
+    groupedMachineNamesMap.set(machineGroupName, groupMachineNames);
+  }
+
+  const sortedGroupNames = Array.from(groupedMachineMaterialMap.keys()).sort((a, b) =>
+    a.localeCompare(b)
+  );
+
+  for (const groupName of sortedGroupNames) {
+    const rows = Array.from(groupedMachineMaterialMap.get(groupName).values()).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+    const machineNames = Array.from(groupedMachineNamesMap.get(groupName) || []).sort((a, b) =>
+      a.localeCompare(b)
+    );
+
+    if (rows.length > 0) {
+      machineWiseMaterials[groupName] = rows;
+      machineWiseGroups[groupName] = {
+        machines: machineNames,
+        materials: rows,
+      };
     }
   }
 
@@ -351,6 +398,7 @@ export async function generateChecklist(machineIds) {
     purchaseMaterials,
     loadingChecklist,
     machineWiseMaterials,
+    machineWiseGroups,
     lowStockAlerts,
   };
 }
