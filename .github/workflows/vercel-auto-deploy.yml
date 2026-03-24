@@ -28,11 +28,25 @@ jobs:
       - name: Validate required secrets
         run: |
           missing=0
-          [ -z "${{ secrets.VERCEL_TOKEN }}" ] && echo "Missing secret: VERCEL_TOKEN" && missing=1
-          [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && echo "Missing secret: VERCEL_ORG_ID" && missing=1
-          [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && echo "Missing secret: VERCEL_PROJECT_ID" && missing=1
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::Missing secret: VERCEL_TOKEN"
+            echo "  → Go to https://vercel.com/account/tokens and create a new token."
+            missing=1
+          fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::Missing secret: VERCEL_ORG_ID"
+            echo "  → Run 'vercel link' locally, then copy 'orgId' from .vercel/project.json"
+            missing=1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "::error::Missing secret: VERCEL_PROJECT_ID"
+            echo "  → Run 'vercel link' locally, then copy 'projectId' from .vercel/project.json"
+            missing=1
+          fi
           if [ $missing -eq 1 ]; then
-            echo "Add these in GitHub: Settings -> Secrets and variables -> Actions"
+            echo ""
+            echo "Add the missing secrets in GitHub:"
+            echo "  Repository → Settings → Secrets and variables → Actions → New repository secret"
             exit 1
           fi
 
