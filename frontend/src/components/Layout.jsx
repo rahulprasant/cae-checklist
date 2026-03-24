@@ -11,14 +11,14 @@ export default function Layout({ currentPage, onChangePage, children }) {
   const activeTitle = pageTitles[currentPage] || 'Dashboard';
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+    <div className="h-screen flex overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       <Sidebar currentPage={currentPage} onChangePage={onChangePage} />
-      <main className="flex-1 px-4 lg:px-8 py-4 lg:py-8 overflow-y-auto">
+      <main className="h-screen flex-1 px-4 lg:px-8 py-4 lg:py-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
           <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                CAE Production Studio
+                Coir All Equipments
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-emerald-950 tracking-tight">
                 Industrial Production Checklist

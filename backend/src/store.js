@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dataDir = process.env.VERCEL ? path.resolve('/tmp', 'cae-checklist-data') : path.resolve(__dirname, '../data');
 const dataFile = path.resolve(dataDir, 'store.json');
+const sourceDataFile = path.resolve(__dirname, '../data/store.json');
 const isVercel = Boolean(process.env.VERCEL);
 
 const CATEGORY_RAW = 'raw';
@@ -38,15 +39,20 @@ async function ensureDataFile() {
   try {
     await readFile(dataFile, 'utf8');
   } catch {
+    if (isVercel && !hasDatabase) {
+      try {
+        const source = await readFile(sourceDataFile, 'utf8');
+        await writeFile(dataFile, source);
+        return;
+      } catch {
+      }
+    }
+
     await writeFile(dataFile, JSON.stringify(initialData, null, 2));
   }
 }
 
 async function loadData() {
-  if (isVercel && !hasDatabase) {
-    throw new Error('Persistent storage is required on Vercel. Set DATABASE_URL (or POSTGRES_URL).');
-  }
-
   await ensureDataFile();
   const raw = await readFile(dataFile, 'utf8');
   const parsed = JSON.parse(raw);
